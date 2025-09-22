@@ -1,0 +1,8 @@
+{
+    "name": "Pedro da Costa Raposo Neto",
+    "social": ["https://www.linkedin.com/in/pedro-raposo-74043610b"],
+    "source-code-repo": "https://github.com/pedrorapos0/rinha2025",
+    "langs": ["node"],
+    "storages":  ["redis"],
+    "load-balancers": ["nginx"]
+}
