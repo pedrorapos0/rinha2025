@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { createClient } from 'redis';
+import { listPaymentsReceived } from './dataStoreRedis';
 
 const payment_processor_default ='http://localhost:8001/payments';
 const payment_processor_fallback ='http://localhost:8002/payments';
@@ -47,17 +47,25 @@ export async function getServiceHealthFallback(): Promise<ResponseServiceHealth>
 
 
 (
-    async () => {
-
-        const redisClient = createClient();
-
-
-
+    async function processorPayment(): Promise<void> {
         const processorDefault = await getServiceHealthDefault();
         const processorFallback = await getServiceHealthFallback();
 
-        if(!processorDefault.failing){
+        if(!processorDefault.failing && !processorFallback.failing){
+            let payments_to_process: Promise<void>[] =[];
+            const payment_received = await listPaymentsReceived();
+
+            if(!payment_received ||payment_received.length===0){
+                return;
+            }
+                for(let i=0; i<payment_received.length; i++){
+                    const paymentPending = paymentProcessorDefault(payment_received[i]);
+                    payments_to_process.push(paymentPending);               
+                }
+                await Promise.all(payments_to_process);
             
+        }if(processorDefault.failing && !processorFallback.failing){
+
         }
 
     }

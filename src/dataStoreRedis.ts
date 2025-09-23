@@ -1,4 +1,4 @@
-import { createClient } from 'redis';
+import { redisConnection } from "./RedisConnectionManager";
 
 export type Payment = {
     correlationId: string;
@@ -12,17 +12,22 @@ export type ResponseServiceHealth = {
 };
 
 export type ResponsePaymentSummary = {
-    totalRequests: number,
-    totalAmount: number
+    default: {
+      totalRequests: number,
+      totalAmount: any
+    },
+    fallback: {
+      totalRequests: number,
+      totalAmount: any
+    }
 }
 
-const redisClient = createClient();
+const redisClient = redisConnection.getClient();
 
- redisClient.on('error', err => console.log('Redis Client Error', err));
 
 
  export async function createConnectionRedis() {
-    await redisClient.connect();
+    await redisConnection.connect();
  }
 
   export async function closeConnectionRedis() {
@@ -53,17 +58,51 @@ export async function paymentsSummary(from: string, to: string) : Promise<Respon
         }
 
         if(from && to){
-           const filteredPayments = payments.filter(payment => new Date(payment.requestedAt) 
-           >= new Date(from) && new Date(payment.requestedAt) <= new Date(to));
-           let totalAmount = filteredPayments.reduce(
+           const filteredPaymentsDefault = payments.filter(payment => new Date(payment.requestedAt) 
+           >= new Date(from) && new Date(payment.requestedAt) <= new Date(to) && payment.paymentProcessor==='default');
+           let totalAmountDefault = filteredPaymentsDefault.reduce(
             (accumulator, currentValue) => accumulator + parseFloat(currentValue.amount), 0,);
-            const summary = {totalRequests:filteredPayments.length,totalAmount:totalAmount};
+
+            const filteredPaymentsFallback = payments.filter(payment => new Date(payment.requestedAt) 
+           >= new Date(from) && new Date(payment.requestedAt) <= new Date(to) && payment.paymentProcessor==='fallback');
+           let totalAmountfallback = filteredPaymentsDefault.reduce(
+            (accumulator, currentValue) => accumulator + parseFloat(currentValue.amount), 0,);
+
+
+
+            const summary = {default:{
+               totalRequests:filteredPaymentsDefault.length,
+               totalAmount:totalAmountDefault
+               }
+         
+            ,fallback:{
+               totalRequests:filteredPaymentsFallback.length,
+               totalAmount:totalAmountfallback
+               }
+            };
            
            return summary;
         }
-       let totalAmount = payments.reduce(
-            (accumulator, currentValue) => accumulator + parseFloat(currentValue.amount), 0,) ;
-            const summary = {totalRequests:payments.length,totalAmount:totalAmount};
+       let totalAmountDefault = payments.filter(payment => payment.paymentProcessor==='default').reduce(
+            (accumulator, currentValue) => accumulator + parseFloat(currentValue.amount), 0,);
+            
+
+        let totalAmountFallback =  payments.filter(payment => payment.paymentProcessor==='fallback').reduce(
+            (accumulator, currentValue) => accumulator + parseFloat(currentValue.amount), 0,);
+            
+
+            const summary = {default:{
+               totalRequests:payments.filter(payment => payment.paymentProcessor==='default').length,
+               totalAmount:totalAmountDefault
+               }
+         
+            ,fallback:{
+               totalRequests:payments.filter(payment => payment.paymentProcessor==='fallback').length,
+               totalAmount:totalAmountFallback
+               }
+            };
+           
+
             return summary;
 
 }
@@ -75,22 +114,18 @@ export async function listPaymentsReceived() : Promise<Payment[]> {
         for await (const keys of redisClient.scanIterator(scanOption)) {
              for(let i=0; i<keys.length; i++){
                 const payment = await redisClient.hGetAll(keys[i] as string);
-                payments.push(payment);
+                if(payment.status_process==='received'){
+                   payments.push(payment);
+                }
              }
         }
-        const paymentReceived = payments.map( payment => {
-         if(payment.status_process == 'received') {
-         return {
+      
+        return payments.map(payment => {
+            return {
                 correlationId: payment.correlationId,
-                amount: payment.amount,
-                requestedAt: payment.requestedAt,
-            
+                amount: parseFloat(payment.amount),
+                requestedAt: payment.requestedAt
             }
-         }else{
-            return;
-         
-         }
-        }) as Payment[];
-        return paymentReceived;
+        });
 
 }

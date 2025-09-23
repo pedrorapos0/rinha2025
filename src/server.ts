@@ -1,10 +1,11 @@
-import Express, { Request, response, Response} from 'express';
+import Express, { Request, Response} from 'express';
 import Cors from 'cors';
-import { createClient } from 'redis';
-import { closeConnectionRedis, createConnectionRedis, listPaymentsReceived, paymentsSummary, receivePayment } from './dataStoreRedis';
+import { createConnectionRedis,closeConnectionRedis, paymentsSummary, receivePayment, listPaymentsReceived } from './dataStoreRedis';
+
 
 (async () => {
 
+  
     await createConnectionRedis();
     const server = Express();
     
