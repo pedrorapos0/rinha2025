@@ -1,6 +1,6 @@
 import Express, { Request, Response} from 'express';
 import Cors from 'cors';
-import { createConnectionRedis,closeConnectionRedis, paymentsSummary, receivePayment, listPaymentsReceived } from './dataStoreRedis';
+import { createConnectionRedis,closeConnectionRedis, paymentsSummary, receivePayment } from './dataStoreRedis';
 
 
 (async () => {
@@ -21,7 +21,7 @@ import { createConnectionRedis,closeConnectionRedis, paymentsSummary, receivePay
     server.get('/payments-summary',async (req: Request, res: Response) => {
         const from = req.query.from as string;
         const to = req.query.to as string;
-        const summary = await listPaymentsReceived();
+        const summary = await paymentsSummary(from, to);
         return res.json(summary);
     })
 

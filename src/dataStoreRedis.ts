@@ -1,4 +1,4 @@
-import { redisConnection } from "./RedisConnectionManager";
+import { redisConnection } from "./redisConnectionManager";
 
 export type Payment = {
     correlationId: string;
@@ -43,6 +43,17 @@ export async function receivePayment(correlationId: string, amount: number): Pro
             "requestedAt" : `${requestedAt}`,
             "paymentProcessor": '',
             "status_process": 'received',
+        });
+}
+
+export async function updatePaymentProcessorField(payment: Payment, paymentProcessor: string): Promise<void> {
+     
+        await redisClient.hSet(`payment:${payment.requestedAt}`, {
+            correlationId: payment.correlationId,
+            amount: payment.amount,
+            requestedAt : payment.requestedAt,
+            paymentProcessor,
+            status_process: 'processed',
         });
 }
 

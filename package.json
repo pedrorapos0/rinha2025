@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "test": "tsx watch src/processor.ts"
+    "dev:server": "tsx watch src/server.ts",
+    "dev:processor": "tsx watch src/processor.ts",
+    "start:processor": "node dist/processor.js",
+    "start:server": "node dist/server.js",
+    "build": "tsup src"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +19,7 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.2",
     "@types/redis": "^4.0.10",
+    "tsup": "^8.5.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },
@@ -24,6 +28,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "pm2": "^6.0.13",
     "redis": "^5.8.2"
   }
 }
