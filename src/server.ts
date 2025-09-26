@@ -1,6 +1,7 @@
 import Express, { Request, Response} from 'express';
 import Cors from 'cors';
 import { createConnectionRedis,closeConnectionRedis, paymentsSummary, receivePayment } from './dataStoreRedis';
+import 'dotenv/config'
 
 
 (async () => {
@@ -11,7 +12,6 @@ import { createConnectionRedis,closeConnectionRedis, paymentsSummary, receivePay
     
     server.use(Cors());
     server.use(Express.json());
-    
     server.post('/payments',async (req: Request, res: Response) => {
         const { correlationId, amount } = req.body;
         await receivePayment(correlationId, amount);
@@ -33,8 +33,8 @@ import { createConnectionRedis,closeConnectionRedis, paymentsSummary, receivePay
         });
     });
 
-    server.listen(8000, ()=> {
-        console.log('Server is Running port 8000!');
+    server.listen(process.env.APP_PORT, ()=> {
+        console.log(`Server is Running port ${process.env.APP_PORT}!`);
     })
 })().catch(async() => {
     await closeConnectionRedis();

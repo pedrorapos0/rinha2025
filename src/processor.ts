@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { createConnectionRedis, listPaymentsReceived, updatePaymentProcessorField } from './dataStoreRedis';
+import 'dotenv/config'
 
-const payment_processor_default ='http://localhost:8001/payments';
-const payment_processor_fallback ='http://localhost:8002/payments';
+const payment_processor_default =`${process.env.PROCESSOR_DEFAULT_URL}/payments`;
+const payment_processor_fallback =`${process.env.PROCESSOR_FALLBACK_URL}/payments`;
 
-const service_health_default ='http://localhost:8001/payments/service-health';
-const service_health_fallback ='http://localhost:8002/payments/service-health';
+const service_health_default =`${process.env.PROCESSOR_DEFAULT_URL}/payments/service-health`;
+const service_health_fallback =`${process.env.PROCESSOR_FALLBACK_URL}/payments/service-health`;
 
 
 

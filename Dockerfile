@@ -14,7 +14,9 @@ FROM node:22-alpine3.21 AS prod
 
 COPY --from=builder /app/dist ./dist
 
-RUN npm install --only=production
+COPY package*.json ./
+
+RUN npm install --omit=dev
 
 EXPOSE 8000
 
