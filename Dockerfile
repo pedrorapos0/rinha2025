@@ -18,7 +18,7 @@ COPY package*.json ./
 
 RUN npm install --omit=dev
 
-EXPOSE 8000
+EXPOSE 8080
 
 CMD ["npx", "pm2-runtime", "start", "dist/server.js", "--", "pm2-runtime", "start", "dist/processor.js"]
 
