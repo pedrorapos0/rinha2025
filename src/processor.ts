@@ -24,13 +24,21 @@ export type ResponseServiceHealth = {
 
 
 export async function paymentProcessorDefault(payment: Payment) {
+    try{
     await axios.post(payment_processor_default,payment);
+    }catch(err){
+        console.log('Error: '+ err);
+    }
 }
 
 export async function paymentProcessorFallback(payment: Payment) {
+    try{
      await axios.post(payment_processor_fallback,
         payment
      );
+     }catch(err){
+        console.log('Error: '+ err);
+    }
 }
 
 export async function getServiceHealthDefault(): Promise<ResponseServiceHealth> {
@@ -93,6 +101,6 @@ export async function getServiceHealthFallback(): Promise<ResponseServiceHealth>
     }
 }
 
-setTimeout(async () => {
+setInterval(async () => {
     await processorPayment();
 }, 5000);
